@@ -1,6 +1,15 @@
 import os
+
 from dotenv import load_dotenv
-from openai import OpenAI
+from langchain_classic.chains import LLMChain
+from langchain_core.prompts import PromptTemplate
+from langchain_openai import ChatOpenAI
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--language", type=str, default="Python")
+parser.add_argument("--task", type=str, default="list of numbers")
+args = parser.parse_args()
 
 load_dotenv()
 
@@ -10,11 +19,17 @@ if not api_key:
         "OPENAI_API_KEY not set. Copy .env.example to .env and add your key."
     )
 
-client = OpenAI(api_key=api_key)
+llm = ChatOpenAI(api_key=api_key, model="gpt-4o-mini")
 
-response = client.chat.completions.create(
-    model="gpt-4o-mini",
-    messages=[{"role": "user", "content": "What is the capital of France?"}],
+code_prompt = PromptTemplate(
+    template="""
+    Write a very short {language} function that {task}.
+    """,
+    input_variables=["language", "task"],
 )
 
-print(response.choices[0].message.content)
+code_chain = LLMChain(llm=llm, prompt=code_prompt)
+
+result = code_chain.run(language=args.language, task=args.task)
+
+print(result)
