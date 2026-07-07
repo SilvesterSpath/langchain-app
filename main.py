@@ -1,6 +1,6 @@
 import os
-
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
@@ -10,6 +10,11 @@ if not api_key:
         "OPENAI_API_KEY not set. Copy .env.example to .env and add your key."
     )
 
-# Use api_key when creating clients, e.g.:
-# from openai import OpenAI
-# client = OpenAI(api_key=api_key)
+client = OpenAI(api_key=api_key)
+
+response = client.chat.completions.create(
+    model="gpt-4o-mini",
+    messages=[{"role": "user", "content": "What is the capital of France?"}],
+)
+
+print(response.choices[0].message.content)
