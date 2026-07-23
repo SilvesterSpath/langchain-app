@@ -2,7 +2,10 @@ from langchain_chroma import Chroma
 from langchain_openai.embeddings import OpenAIEmbeddings
 from langchain_classic.chains import RetrievalQA
 from langchain_openai import ChatOpenAI
+from langchain_core.globals import set_debug
 from dotenv import load_dotenv
+
+set_debug(True)
 
 load_dotenv()
 
@@ -15,12 +18,14 @@ db = Chroma(
 retriever = db.as_retriever()
 
 chain = RetrievalQA.from_chain_type(
-  llm=ChatOpenAI(model="gpt-4o-mini"),
-  chain_type="stuff",
-  retriever=retriever
+  llm=ChatOpenAI(),
+  chain_type="refine",
+  # chain_type="map_reduce",
+  # chain_type="stuff",
+  retriever=retriever,
 )
 
-result = chain.run("What is an interesting fact about the English language?")
-print(result)
+result = chain.invoke({"query": "What is an interesting fact about the English language?"})
+print(result["result"])
 
 
